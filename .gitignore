@@ -1,0 +1,54 @@
+# ── Cache script ────────────────────────────────────────────────────
+.cache_skripsi/
+
+# ── Output hasil pencarian ───────────────────────────────────────────
+skripsi_*.csv
+skripsi_*.json
+skripsi_*.xlsx
+hasil_*.csv
+hasil_*.json
+hasil_*.xlsx
+
+# ── Python ───────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+.Python
+
+# ── Virtual environment ──────────────────────────────────────────────
+venv/
+.venv/
+env/
+.env/
+ENV/
+
+# ── Distribution / packaging ─────────────────────────────────────────
+build/
+dist/
+*.egg-info/
+*.egg
+
+# ── IDE & editor ─────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
+
+# ── OS ───────────────────────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+Thumbs.db
+desktop.ini
+
+# ── Logs ─────────────────────────────────────────────────────────────
+*.log
+logs/
+
+# ── Environment variables ────────────────────────────────────────────
+.env
+.env.local

@@ -1,0 +1,1168 @@
+{
+  "_meta": {
+    "versi": "1.2",
+    "keterangan": "Konfigurasi repository skripsi perguruan tinggi Indonesia",
+    "total": 75,
+    "platform_dominan": ["eprints", "dspace", "slims", "gdl"],
+    "protokol": ["OAI-PMH", "REST", "HTML-scrape"],
+    "terakhir_diperbarui": "2025-01"
+  },
+
+  "universitas": [
+
+    {
+      "id": "ui",
+      "nama": "Universitas Indonesia",
+      "kota": "Depok",
+      "provinsi": "Jawa Barat",
+      "tipe": "PTN",
+      "platform": "lontar",
+      "url_base": "https://lib.ui.ac.id",
+      "oai_endpoint": null,
+      "search_url": "https://lib.ui.ac.id/naskahringkas/site/search",
+      "search_params": {"q": "{keyword}", "format": "full"},
+      "search_method": "GET",
+      "parser": "ui_lontar"
+    },
+
+    {
+      "id": "ugm",
+      "nama": "Universitas Gadjah Mada",
+      "kota": "Yogyakarta",
+      "provinsi": "DI Yogyakarta",
+      "tipe": "PTN",
+      "platform": "etd_ugm",
+      "url_base": "https://etd.repository.ugm.ac.id",
+      "oai_endpoint": null,
+      "search_url": "https://etd.repository.ugm.ac.id/penelitian/detail/",
+      "search_params": {"mpage": "penelitian", "msubpage": "list", "q": "{keyword}"},
+      "search_method": "GET",
+      "parser": "generic"
+    },
+
+    {
+      "id": "itb",
+      "nama": "Institut Teknologi Bandung",
+      "kota": "Bandung",
+      "provinsi": "Jawa Barat",
+      "tipe": "PTN",
+      "platform": "dspace",
+      "url_base": "https://digilib.itb.ac.id",
+      "oai_endpoint": "https://digilib.itb.ac.id/cgi-bin/oai.pl",
+      "search_url": "https://digilib.itb.ac.id/gdl.php",
+      "search_params": {"mod": "browse", "op": "read", "q": "{keyword}"},
+      "search_method": "GET",
+      "parser": "gdl_itb"
+    },
+
+    {
+      "id": "its",
+      "nama": "Institut Teknologi Sepuluh Nopember",
+      "kota": "Surabaya",
+      "provinsi": "Jawa Timur",
+      "tipe": "PTN",
+      "platform": "eprints",
+      "url_base": "https://repository.its.ac.id",
+      "oai_endpoint": "https://repository.its.ac.id/cgi/oai2",
+      "search_url": "https://repository.its.ac.id/cgi-bin/search.cgi",
+      "search_params": {"q": "{keyword}", "order": "-date", "action_search": "Search"},
+      "search_method": "GET",
+      "parser": "eprints"
+    },
+
+    {
+      "id": "ipb",
+      "nama": "Institut Pertanian Bogor",
+      "kota": "Bogor",
+      "provinsi": "Jawa Barat",
+      "tipe": "PTN",
+      "platform": "dspace",
+      "url_base": "https://repository.ipb.ac.id",
+      "oai_endpoint": "https://repository.ipb.ac.id/oai/request",
+      "search_url": "https://repository.ipb.ac.id/discover",
+      "search_params": {"query": "{keyword}", "rpp": "20"},
+      "search_method": "GET",
+      "parser": "dspace"
+    },
+
+    {
+      "id": "unair",
+      "nama": "Universitas Airlangga",
+      "kota": "Surabaya",
+      "provinsi": "Jawa Timur",
+      "tipe": "PTN",
+      "platform": "eprints",
+      "url_base": "https://repository.unair.ac.id",
+      "oai_endpoint": "https://repository.unair.ac.id/cgi/oai2",
+      "search_url": "https://repository.unair.ac.id/cgi-bin/search.cgi",
+      "search_params": {"q": "{keyword}", "action_search": "Search"},
+      "search_method": "GET",
+      "parser": "eprints"
+    },
+
+    {
+      "id": "undip",
+      "nama": "Universitas Diponegoro",
+      "kota": "Semarang",
+      "provinsi": "Jawa Tengah",
+      "tipe": "PTN",
+      "platform": "eprints",
+      "url_base": "https://eprints.undip.ac.id",
+      "oai_endpoint": "https://eprints.undip.ac.id/cgi/oai2",
+      "search_url": "https://eprints.undip.ac.id/cgi-bin/search/search.cgi",
+      "search_params": {"q": "{keyword}", "action_search": "Search", "order": "-date"},
+      "search_method": "GET",
+      "parser": "eprints"
+    },
+
+    {
+      "id": "unpad",
+      "nama": "Universitas Padjadjaran",
+      "kota": "Bandung",
+      "provinsi": "Jawa Barat",
+      "tipe": "PTN",
+      "platform": "eprints",
+      "url_base": "https://repository.unpad.ac.id",
+      "oai_endpoint": "https://repository.unpad.ac.id/cgi/oai2",
+      "search_url": "https://repository.unpad.ac.id/cgi-bin/search.cgi",
+      "search_params": {"q": "{keyword}", "action_search": "Search"},
+      "search_method": "GET",
+      "parser": "eprints"
+    },
+
+    {
+      "id": "uny",
+      "nama": "Universitas Negeri Yogyakarta",
+      "kota": "Yogyakarta",
+      "provinsi": "DI Yogyakarta",
+      "tipe": "PTN",
+      "platform": "eprints",
+      "url_base": "https://eprints.uny.ac.id",
+      "oai_endpoint": "https://eprints.uny.ac.id/cgi/oai2",
+      "search_url": "https://eprints.uny.ac.id/cgi-bin/search/search.cgi",
+      "search_params": {"q": "{keyword}", "action_search": "Search"},
+      "search_method": "GET",
+      "parser": "eprints"
+    },
+
+    {
+      "id": "um",
+      "nama": "Universitas Negeri Malang",
+      "kota": "Malang",
+      "provinsi": "Jawa Timur",
+      "tipe": "PTN",
+      "platform": "dspace",
+      "url_base": "https://repository.um.ac.id",
+      "oai_endpoint": "https://repository.um.ac.id/oai/request",
+      "search_url": "https://repository.um.ac.id/xmlui/discover",
+      "search_params": {"query": "{keyword}", "rpp": "20"},
+      "search_method": "GET",
+      "parser": "dspace"
+    },
+
+    {
+      "id": "unnes",
+      "nama": "Universitas Negeri Semarang",
+      "kota": "Semarang",
+      "provinsi": "Jawa Tengah",
+      "tipe": "PTN",
+      "platform": "eprints",
+      "url_base": "https://lib.unnes.ac.id",
+      "oai_endpoint": "https://lib.unnes.ac.id/cgi-bin/oai.pl",
+      "search_url": "https://lib.unnes.ac.id/search",
+      "search_params": {"q": "{keyword}", "per_page": "20"},
+      "search_method": "GET",
+      "parser": "senayan"
+    },
+
+    {
+      "id": "upi",
+      "nama": "Universitas Pendidikan Indonesia",
+      "kota": "Bandung",
+      "provinsi": "Jawa Barat",
+      "tipe": "PTN",
+      "platform": "eprints",
+      "url_base": "https://repository.upi.edu",
+      "oai_endpoint": "https://repository.upi.edu/cgi/oai2",
+      "search_url": "https://repository.upi.edu/cgi-bin/search/search.cgi",
+      "search_params": {"q": "{keyword}", "action_search": "Search"},
+      "search_method": "GET",
+      "parser": "eprints"
+    },
+
+    {
+      "id": "uns",
+      "nama": "Universitas Sebelas Maret",
+      "kota": "Surakarta",
+      "provinsi": "Jawa Tengah",
+      "tipe": "PTN",
+      "platform": "digilib",
+      "url_base": "https://digilib.uns.ac.id",
+      "oai_endpoint": null,
+      "search_url": "https://digilib.uns.ac.id/dokumen/pencarian_sederhana",
+      "search_params": {"q": "{keyword}"},
+      "search_method": "GET",
+      "parser": "generic"
+    },
+
+    {
+      "id": "ub",
+      "nama": "Universitas Brawijaya",
+      "kota": "Malang",
+      "provinsi": "Jawa Timur",
+      "tipe": "PTN",
+      "platform": "eprints",
+      "url_base": "https://repository.ub.ac.id",
+      "oai_endpoint": "https://repository.ub.ac.id/cgi/oai2",
+      "search_url": "https://repository.ub.ac.id/cgi-bin/search.cgi",
+      "search_params": {"q": "{keyword}", "action_search": "Search"},
+      "search_method": "GET",
+      "parser": "eprints"
+    },
+
+    {
+      "id": "unej",
+      "nama": "Universitas Jember",
+      "kota": "Jember",
+      "provinsi": "Jawa Timur",
+      "tipe": "PTN",
+      "platform": "dspace",
+      "url_base": "https://repository.unej.ac.id",
+      "oai_endpoint": "https://repository.unej.ac.id/oai/request",
+      "search_url": "https://repository.unej.ac.id/xmlui/discover",
+      "search_params": {"query": "{keyword}"},
+      "search_method": "GET",
+      "parser": "dspace"
+    },
+
+    {
+      "id": "unhas",
+      "nama": "Universitas Hasanuddin",
+      "kota": "Makassar",
+      "provinsi": "Sulawesi Selatan",
+      "tipe": "PTN",
+      "platform": "eprints",
+      "url_base": "https://repository.unhas.ac.id",
+      "oai_endpoint": "https://repository.unhas.ac.id/cgi/oai2",
+      "search_url": "https://repository.unhas.ac.id/xmlui/discover",
+      "search_params": {"query": "{keyword}"},
+      "search_method": "GET",
+      "parser": "dspace"
+    },
+
+    {
+      "id": "usu",
+      "nama": "Universitas Sumatera Utara",
+      "kota": "Medan",
+      "provinsi": "Sumatera Utara",
+      "tipe": "PTN",
+      "platform": "dspace",
+      "url_base": "https://repositori.usu.ac.id",
+      "oai_endpoint": "https://repositori.usu.ac.id/oai/request",
+      "search_url": "https://repositori.usu.ac.id/discover",
+      "search_params": {"query": "{keyword}"},
+      "search_method": "GET",
+      "parser": "dspace"
+    },
+
+    {
+      "id": "unand",
+      "nama": "Universitas Andalas",
+      "kota": "Padang",
+      "provinsi": "Sumatera Barat",
+      "tipe": "PTN",
+      "platform": "eprints",
+      "url_base": "https://scholar.unand.ac.id",
+      "oai_endpoint": "https://scholar.unand.ac.id/cgi/oai2",
+      "search_url": "https://scholar.unand.ac.id/cgi-bin/search/search.cgi",
+      "search_params": {"q": "{keyword}", "action_search": "Search"},
+      "search_method": "GET",
+      "parser": "eprints"
+    },
+
+    {
+      "id": "unsri",
+      "nama": "Universitas Sriwijaya",
+      "kota": "Palembang",
+      "provinsi": "Sumatera Selatan",
+      "tipe": "PTN",
+      "platform": "eprints",
+      "url_base": "https://repository.unsri.ac.id",
+      "oai_endpoint": "https://repository.unsri.ac.id/cgi/oai2",
+      "search_url": "https://repository.unsri.ac.id/cgi-bin/search/search.cgi",
+      "search_params": {"q": "{keyword}", "action_search": "Search"},
+      "search_method": "GET",
+      "parser": "eprints"
+    },
+
+    {
+      "id": "unri",
+      "nama": "Universitas Riau",
+      "kota": "Pekanbaru",
+      "provinsi": "Riau",
+      "tipe": "PTN",
+      "platform": "eprints",
+      "url_base": "https://repository.unri.ac.id",
+      "oai_endpoint": "https://repository.unri.ac.id/cgi/oai2",
+      "search_url": "https://repository.unri.ac.id/xmlui/discover",
+      "search_params": {"query": "{keyword}"},
+      "search_method": "GET",
+      "parser": "dspace"
+    },
+
+    {
+      "id": "untan",
+      "nama": "Universitas Tanjungpura",
+      "kota": "Pontianak",
+      "provinsi": "Kalimantan Barat",
+      "tipe": "PTN",
+      "platform": "eprints",
+      "url_base": "https://jurnal.untan.ac.id",
+      "oai_endpoint": null,
+      "search_url": "https://jurnal.untan.ac.id/index.php/jmtk/search/search",
+      "search_params": {"query": "{keyword}"},
+      "search_method": "GET",
+      "parser": "generic"
+    },
+
+    {
+      "id": "ulm",
+      "nama": "Universitas Lambung Mangkurat",
+      "kota": "Banjarmasin",
+      "provinsi": "Kalimantan Selatan",
+      "tipe": "PTN",
+      "platform": "eprints",
+      "url_base": "https://eprints.ulm.ac.id",
+      "oai_endpoint": "https://eprints.ulm.ac.id/cgi/oai2",
+      "search_url": "https://eprints.ulm.ac.id/cgi-bin/search/search.cgi",
+      "search_params": {"q": "{keyword}", "action_search": "Search"},
+      "search_method": "GET",
+      "parser": "eprints"
+    },
+
+    {
+      "id": "unmul",
+      "nama": "Universitas Mulawarman",
+      "kota": "Samarinda",
+      "provinsi": "Kalimantan Timur",
+      "tipe": "PTN",
+      "platform": "eprints",
+      "url_base": "https://repository.unmul.ac.id",
+      "oai_endpoint": "https://repository.unmul.ac.id/cgi/oai2",
+      "search_url": "https://repository.unmul.ac.id/cgi-bin/search.cgi",
+      "search_params": {"q": "{keyword}", "action_search": "Search"},
+      "search_method": "GET",
+      "parser": "eprints"
+    },
+
+    {
+      "id": "unud",
+      "nama": "Universitas Udayana",
+      "kota": "Denpasar",
+      "provinsi": "Bali",
+      "tipe": "PTN",
+      "platform": "eprints",
+      "url_base": "https://erepo.unud.ac.id",
+      "oai_endpoint": "https://erepo.unud.ac.id/cgi/oai2",
+      "search_url": "https://erepo.unud.ac.id/in/search.do",
+      "search_params": {"keyword": "{keyword}"},
+      "search_method": "GET",
+      "parser": "generic"
+    },
+
+    {
+      "id": "undiksha",
+      "nama": "Universitas Pendidikan Ganesha",
+      "kota": "Singaraja",
+      "provinsi": "Bali",
+      "tipe": "PTN",
+      "platform": "eprints",
+      "url_base": "https://ejournal.undiksha.ac.id",
+      "oai_endpoint": null,
+      "search_url": "https://ejournal.undiksha.ac.id/index.php/JJTE/search/search",
+      "search_params": {"query": "{keyword}"},
+      "search_method": "GET",
+      "parser": "generic"
+    },
+
+    {
+      "id": "unram",
+      "nama": "Universitas Mataram",
+      "kota": "Mataram",
+      "provinsi": "Nusa Tenggara Barat",
+      "tipe": "PTN",
+      "platform": "eprints",
+      "url_base": "https://eprints.unram.ac.id",
+      "oai_endpoint": "https://eprints.unram.ac.id/cgi/oai2",
+      "search_url": "https://eprints.unram.ac.id/cgi-bin/search/search.cgi",
+      "search_params": {"q": "{keyword}", "action_search": "Search"},
+      "search_method": "GET",
+      "parser": "eprints"
+    },
+
+    {
+      "id": "undana",
+      "nama": "Universitas Nusa Cendana",
+      "kota": "Kupang",
+      "provinsi": "Nusa Tenggara Timur",
+      "tipe": "PTN",
+      "platform": "eprints",
+      "url_base": "https://repository.undana.ac.id",
+      "oai_endpoint": null,
+      "search_url": "https://repository.undana.ac.id/cgi-bin/search.cgi",
+      "search_params": {"q": "{keyword}", "action_search": "Search"},
+      "search_method": "GET",
+      "parser": "eprints"
+    },
+
+    {
+      "id": "unpatti",
+      "nama": "Universitas Pattimura",
+      "kota": "Ambon",
+      "provinsi": "Maluku",
+      "tipe": "PTN",
+      "platform": "eprints",
+      "url_base": "https://eprints.unpatti.ac.id",
+      "oai_endpoint": null,
+      "search_url": "https://eprints.unpatti.ac.id/cgi-bin/search.cgi",
+      "search_params": {"q": "{keyword}", "action_search": "Search"},
+      "search_method": "GET",
+      "parser": "eprints"
+    },
+
+    {
+      "id": "uncen",
+      "nama": "Universitas Cenderawasih",
+      "kota": "Jayapura",
+      "provinsi": "Papua",
+      "tipe": "PTN",
+      "platform": "eprints",
+      "url_base": "https://repository.uncen.ac.id",
+      "oai_endpoint": null,
+      "search_url": "https://repository.uncen.ac.id/cgi-bin/search.cgi",
+      "search_params": {"q": "{keyword}", "action_search": "Search"},
+      "search_method": "GET",
+      "parser": "eprints"
+    },
+
+    {
+      "id": "unkhair",
+      "nama": "Universitas Khairun",
+      "kota": "Ternate",
+      "provinsi": "Maluku Utara",
+      "tipe": "PTN",
+      "platform": "eprints",
+      "url_base": "https://eprints.unkhair.ac.id",
+      "oai_endpoint": null,
+      "search_url": "https://eprints.unkhair.ac.id/cgi-bin/search.cgi",
+      "search_params": {"q": "{keyword}", "action_search": "Search"},
+      "search_method": "GET",
+      "parser": "eprints"
+    },
+
+    {
+      "id": "unimed",
+      "nama": "Universitas Negeri Medan",
+      "kota": "Medan",
+      "provinsi": "Sumatera Utara",
+      "tipe": "PTN",
+      "platform": "eprints",
+      "url_base": "https://digilib.unimed.ac.id",
+      "oai_endpoint": "https://digilib.unimed.ac.id/cgi/oai2",
+      "search_url": "https://digilib.unimed.ac.id/cgi-bin/search/search.cgi",
+      "search_params": {"q": "{keyword}", "action_search": "Search"},
+      "search_method": "GET",
+      "parser": "eprints"
+    },
+
+    {
+      "id": "unp",
+      "nama": "Universitas Negeri Padang",
+      "kota": "Padang",
+      "provinsi": "Sumatera Barat",
+      "tipe": "PTN",
+      "platform": "eprints",
+      "url_base": "https://ejournal.unp.ac.id",
+      "oai_endpoint": null,
+      "search_url": "https://ejournal.unp.ac.id/index.php/jupemasi-pbio/search/search",
+      "search_params": {"query": "{keyword}"},
+      "search_method": "GET",
+      "parser": "generic"
+    },
+
+    {
+      "id": "unib",
+      "nama": "Universitas Bengkulu",
+      "kota": "Bengkulu",
+      "provinsi": "Bengkulu",
+      "tipe": "PTN",
+      "platform": "eprints",
+      "url_base": "https://repository.unib.ac.id",
+      "oai_endpoint": "https://repository.unib.ac.id/cgi/oai2",
+      "search_url": "https://repository.unib.ac.id/cgi-bin/search/search.cgi",
+      "search_params": {"q": "{keyword}", "action_search": "Search"},
+      "search_method": "GET",
+      "parser": "eprints"
+    },
+
+    {
+      "id": "unja",
+      "nama": "Universitas Jambi",
+      "kota": "Jambi",
+      "provinsi": "Jambi",
+      "tipe": "PTN",
+      "platform": "eprints",
+      "url_base": "https://repository.unja.ac.id",
+      "oai_endpoint": "https://repository.unja.ac.id/cgi/oai2",
+      "search_url": "https://repository.unja.ac.id/cgi-bin/search.cgi",
+      "search_params": {"q": "{keyword}", "action_search": "Search"},
+      "search_method": "GET",
+      "parser": "eprints"
+    },
+
+    {
+      "id": "unlamp",
+      "nama": "Universitas Lampung",
+      "kota": "Bandar Lampung",
+      "provinsi": "Lampung",
+      "tipe": "PTN",
+      "platform": "eprints",
+      "url_base": "https://digilib.unila.ac.id",
+      "oai_endpoint": "https://digilib.unila.ac.id/cgi/oai2",
+      "search_url": "https://digilib.unila.ac.id/cgi-bin/search/search.cgi",
+      "search_params": {"q": "{keyword}", "action_search": "Search"},
+      "search_method": "GET",
+      "parser": "eprints"
+    },
+
+    {
+      "id": "sultan_ageng",
+      "nama": "Universitas Sultan Ageng Tirtayasa",
+      "kota": "Serang",
+      "provinsi": "Banten",
+      "tipe": "PTN",
+      "platform": "eprints",
+      "url_base": "https://repository.untirta.ac.id",
+      "oai_endpoint": "https://repository.untirta.ac.id/cgi/oai2",
+      "search_url": "https://repository.untirta.ac.id/cgi-bin/search.cgi",
+      "search_params": {"q": "{keyword}", "action_search": "Search"},
+      "search_method": "GET",
+      "parser": "eprints"
+    },
+
+    {
+      "id": "uinsby",
+      "nama": "UIN Sunan Ampel Surabaya",
+      "kota": "Surabaya",
+      "provinsi": "Jawa Timur",
+      "tipe": "PTN",
+      "platform": "eprints",
+      "url_base": "https://digilib.uinsby.ac.id",
+      "oai_endpoint": "https://digilib.uinsby.ac.id/cgi/oai2",
+      "search_url": "https://digilib.uinsby.ac.id/cgi-bin/search/search.cgi",
+      "search_params": {"q": "{keyword}", "action_search": "Search"},
+      "search_method": "GET",
+      "parser": "eprints"
+    },
+
+    {
+      "id": "uinsuka",
+      "nama": "UIN Sunan Kalijaga Yogyakarta",
+      "kota": "Yogyakarta",
+      "provinsi": "DI Yogyakarta",
+      "tipe": "PTN",
+      "platform": "eprints",
+      "url_base": "https://digilib.uin-suka.ac.id",
+      "oai_endpoint": "https://digilib.uin-suka.ac.id/cgi/oai2",
+      "search_url": "https://digilib.uin-suka.ac.id/cgi-bin/search/search.cgi",
+      "search_params": {"q": "{keyword}", "action_search": "Search"},
+      "search_method": "GET",
+      "parser": "eprints"
+    },
+
+    {
+      "id": "uinbandung",
+      "nama": "UIN Sunan Gunung Djati Bandung",
+      "kota": "Bandung",
+      "provinsi": "Jawa Barat",
+      "tipe": "PTN",
+      "platform": "eprints",
+      "url_base": "https://digilib.uinsgd.ac.id",
+      "oai_endpoint": "https://digilib.uinsgd.ac.id/cgi/oai2",
+      "search_url": "https://digilib.uinsgd.ac.id/cgi-bin/search/search.cgi",
+      "search_params": {"q": "{keyword}", "action_search": "Search"},
+      "search_method": "GET",
+      "parser": "eprints"
+    },
+
+    {
+      "id": "uinmalang",
+      "nama": "UIN Maulana Malik Ibrahim Malang",
+      "kota": "Malang",
+      "provinsi": "Jawa Timur",
+      "tipe": "PTN",
+      "platform": "eprints",
+      "url_base": "https://etheses.uin-malang.ac.id",
+      "oai_endpoint": "https://etheses.uin-malang.ac.id/cgi/oai2",
+      "search_url": "https://etheses.uin-malang.ac.id/cgi-bin/search/search.cgi",
+      "search_params": {"q": "{keyword}", "action_search": "Search"},
+      "search_method": "GET",
+      "parser": "eprints"
+    },
+
+    {
+      "id": "uinjakarta",
+      "nama": "UIN Syarif Hidayatullah Jakarta",
+      "kota": "Jakarta",
+      "provinsi": "DKI Jakarta",
+      "tipe": "PTN",
+      "platform": "eprints",
+      "url_base": "https://repository.uinjkt.ac.id",
+      "oai_endpoint": "https://repository.uinjkt.ac.id/dspace/oai/request",
+      "search_url": "https://repository.uinjkt.ac.id/dspace/discover",
+      "search_params": {"query": "{keyword}"},
+      "search_method": "GET",
+      "parser": "dspace"
+    },
+
+    {
+      "id": "uinwalisongo",
+      "nama": "UIN Walisongo Semarang",
+      "kota": "Semarang",
+      "provinsi": "Jawa Tengah",
+      "tipe": "PTN",
+      "platform": "eprints",
+      "url_base": "https://eprints.walisongo.ac.id",
+      "oai_endpoint": "https://eprints.walisongo.ac.id/cgi/oai2",
+      "search_url": "https://eprints.walisongo.ac.id/cgi-bin/search/search.cgi",
+      "search_params": {"q": "{keyword}", "action_search": "Search"},
+      "search_method": "GET",
+      "parser": "eprints"
+    },
+
+    {
+      "id": "iainpurwokerto",
+      "nama": "IAIN Purwokerto",
+      "kota": "Purwokerto",
+      "provinsi": "Jawa Tengah",
+      "tipe": "PTN",
+      "platform": "eprints",
+      "url_base": "https://repository.uinsaizu.ac.id",
+      "oai_endpoint": "https://repository.uinsaizu.ac.id/cgi/oai2",
+      "search_url": "https://repository.uinsaizu.ac.id/cgi-bin/search/search.cgi",
+      "search_params": {"q": "{keyword}", "action_search": "Search"},
+      "search_method": "GET",
+      "parser": "eprints"
+    },
+
+    {
+      "id": "upnvj",
+      "nama": "UPN Veteran Jakarta",
+      "kota": "Jakarta",
+      "provinsi": "DKI Jakarta",
+      "tipe": "PTN",
+      "platform": "eprints",
+      "url_base": "https://repository.upnvj.ac.id",
+      "oai_endpoint": null,
+      "search_url": "https://repository.upnvj.ac.id/xmlui/discover",
+      "search_params": {"query": "{keyword}"},
+      "search_method": "GET",
+      "parser": "dspace"
+    },
+
+    {
+      "id": "upnvyk",
+      "nama": "UPN Veteran Yogyakarta",
+      "kota": "Yogyakarta",
+      "provinsi": "DI Yogyakarta",
+      "tipe": "PTN",
+      "platform": "eprints",
+      "url_base": "https://eprints.upnyk.ac.id",
+      "oai_endpoint": "https://eprints.upnyk.ac.id/cgi/oai2",
+      "search_url": "https://eprints.upnyk.ac.id/cgi-bin/search/search.cgi",
+      "search_params": {"q": "{keyword}", "action_search": "Search"},
+      "search_method": "GET",
+      "parser": "eprints"
+    },
+
+    {
+      "id": "upnvjt",
+      "nama": "UPN Veteran Jawa Timur",
+      "kota": "Surabaya",
+      "provinsi": "Jawa Timur",
+      "tipe": "PTN",
+      "platform": "eprints",
+      "url_base": "https://eprints.upnjatim.ac.id",
+      "oai_endpoint": "https://eprints.upnjatim.ac.id/cgi/oai2",
+      "search_url": "https://eprints.upnjatim.ac.id/cgi-bin/search/search.cgi",
+      "search_params": {"q": "{keyword}", "action_search": "Search"},
+      "search_method": "GET",
+      "parser": "eprints"
+    },
+
+    {
+      "id": "unsoed",
+      "nama": "Universitas Jenderal Soedirman",
+      "kota": "Purwokerto",
+      "provinsi": "Jawa Tengah",
+      "tipe": "PTN",
+      "platform": "eprints",
+      "url_base": "https://repository.unsoed.ac.id",
+      "oai_endpoint": "https://repository.unsoed.ac.id/cgi/oai2",
+      "search_url": "https://repository.unsoed.ac.id/cgi-bin/search.cgi",
+      "search_params": {"q": "{keyword}", "action_search": "Search"},
+      "search_method": "GET",
+      "parser": "eprints"
+    },
+
+    {
+      "id": "unikama",
+      "nama": "Universitas PGRI Kanjuruhan Malang",
+      "kota": "Malang",
+      "provinsi": "Jawa Timur",
+      "tipe": "PTS",
+      "platform": "eprints",
+      "url_base": "https://eprints.unikama.ac.id",
+      "oai_endpoint": "https://eprints.unikama.ac.id/cgi/oai2",
+      "search_url": "https://eprints.unikama.ac.id/cgi-bin/search/search.cgi",
+      "search_params": {"q": "{keyword}", "action_search": "Search"},
+      "search_method": "GET",
+      "parser": "eprints"
+    },
+
+    {
+      "id": "uii",
+      "nama": "Universitas Islam Indonesia",
+      "kota": "Yogyakarta",
+      "provinsi": "DI Yogyakarta",
+      "tipe": "PTS",
+      "platform": "eprints",
+      "url_base": "https://dspace.uii.ac.id",
+      "oai_endpoint": "https://dspace.uii.ac.id/oai/request",
+      "search_url": "https://dspace.uii.ac.id/discover",
+      "search_params": {"query": "{keyword}"},
+      "search_method": "GET",
+      "parser": "dspace"
+    },
+
+    {
+      "id": "umy",
+      "nama": "Universitas Muhammadiyah Yogyakarta",
+      "kota": "Yogyakarta",
+      "provinsi": "DI Yogyakarta",
+      "tipe": "PTS",
+      "platform": "eprints",
+      "url_base": "https://repository.umy.ac.id",
+      "oai_endpoint": "https://repository.umy.ac.id/cgi/oai2",
+      "search_url": "https://repository.umy.ac.id/cgi-bin/search.cgi",
+      "search_params": {"q": "{keyword}", "action_search": "Search"},
+      "search_method": "GET",
+      "parser": "eprints"
+    },
+
+    {
+      "id": "ums",
+      "nama": "Universitas Muhammadiyah Surakarta",
+      "kota": "Surakarta",
+      "provinsi": "Jawa Tengah",
+      "tipe": "PTS",
+      "platform": "eprints",
+      "url_base": "https://eprints.ums.ac.id",
+      "oai_endpoint": "https://eprints.ums.ac.id/cgi/oai2",
+      "search_url": "https://eprints.ums.ac.id/cgi-bin/search/search.cgi",
+      "search_params": {"q": "{keyword}", "action_search": "Search"},
+      "search_method": "GET",
+      "parser": "eprints"
+    },
+
+    {
+      "id": "umm",
+      "nama": "Universitas Muhammadiyah Malang",
+      "kota": "Malang",
+      "provinsi": "Jawa Timur",
+      "tipe": "PTS",
+      "platform": "eprints",
+      "url_base": "https://eprints.umm.ac.id",
+      "oai_endpoint": "https://eprints.umm.ac.id/cgi/oai2",
+      "search_url": "https://eprints.umm.ac.id/cgi-bin/search/search.cgi",
+      "search_params": {"q": "{keyword}", "action_search": "Search"},
+      "search_method": "GET",
+      "parser": "eprints"
+    },
+
+    {
+      "id": "uad",
+      "nama": "Universitas Ahmad Dahlan",
+      "kota": "Yogyakarta",
+      "provinsi": "DI Yogyakarta",
+      "tipe": "PTS",
+      "platform": "eprints",
+      "url_base": "https://eprints.uad.ac.id",
+      "oai_endpoint": "https://eprints.uad.ac.id/cgi/oai2",
+      "search_url": "https://eprints.uad.ac.id/cgi-bin/search/search.cgi",
+      "search_params": {"q": "{keyword}", "action_search": "Search"},
+      "search_method": "GET",
+      "parser": "eprints"
+    },
+
+    {
+      "id": "unika",
+      "nama": "Universitas Atma Jaya Yogyakarta",
+      "kota": "Yogyakarta",
+      "provinsi": "DI Yogyakarta",
+      "tipe": "PTS",
+      "platform": "eprints",
+      "url_base": "https://e-journal.uajy.ac.id",
+      "oai_endpoint": null,
+      "search_url": "https://e-journal.uajy.ac.id/index.php/jt/search/search",
+      "search_params": {"query": "{keyword}"},
+      "search_method": "GET",
+      "parser": "generic"
+    },
+
+    {
+      "id": "ubaya",
+      "nama": "Universitas Surabaya",
+      "kota": "Surabaya",
+      "provinsi": "Jawa Timur",
+      "tipe": "PTS",
+      "platform": "generic",
+      "url_base": "https://repository.ubaya.ac.id",
+      "oai_endpoint": null,
+      "search_url": "https://repository.ubaya.ac.id/xmlui/discover",
+      "search_params": {"query": "{keyword}"},
+      "search_method": "GET",
+      "parser": "dspace"
+    },
+
+    {
+      "id": "unisba",
+      "nama": "Universitas Islam Bandung",
+      "kota": "Bandung",
+      "provinsi": "Jawa Barat",
+      "tipe": "PTS",
+      "platform": "eprints",
+      "url_base": "https://elibrary.unisba.ac.id",
+      "oai_endpoint": "https://elibrary.unisba.ac.id/cgi/oai2",
+      "search_url": "https://elibrary.unisba.ac.id/cgi-bin/search/search.cgi",
+      "search_params": {"q": "{keyword}", "action_search": "Search"},
+      "search_method": "GET",
+      "parser": "eprints"
+    },
+
+    {
+      "id": "itenas",
+      "nama": "Institut Teknologi Nasional Bandung",
+      "kota": "Bandung",
+      "provinsi": "Jawa Barat",
+      "tipe": "PTS",
+      "platform": "eprints",
+      "url_base": "https://ejurnal.itenas.ac.id",
+      "oai_endpoint": null,
+      "search_url": "https://ejurnal.itenas.ac.id/index.php/rekayasa/search/search",
+      "search_params": {"query": "{keyword}"},
+      "search_method": "GET",
+      "parser": "generic"
+    },
+
+    {
+      "id": "telkom",
+      "nama": "Universitas Telkom",
+      "kota": "Bandung",
+      "provinsi": "Jawa Barat",
+      "tipe": "PTS",
+      "platform": "slims",
+      "url_base": "https://openlibrary.telkomuniversity.ac.id",
+      "oai_endpoint": null,
+      "search_url": "https://openlibrary.telkomuniversity.ac.id/pustaka/",
+      "search_params": {"search_for": "{keyword}"},
+      "search_method": "GET",
+      "parser": "slims"
+    },
+
+    {
+      "id": "binus",
+      "nama": "Binus University",
+      "kota": "Jakarta",
+      "provinsi": "DKI Jakarta",
+      "tipe": "PTS",
+      "platform": "custom",
+      "url_base": "https://thesis.binus.ac.id",
+      "oai_endpoint": null,
+      "search_url": "https://thesis.binus.ac.id/Asli/Main",
+      "search_params": {"keyword": "{keyword}"},
+      "search_method": "GET",
+      "parser": "binus"
+    },
+
+    {
+      "id": "mercubuana",
+      "nama": "Universitas Mercu Buana",
+      "kota": "Jakarta",
+      "provinsi": "DKI Jakarta",
+      "tipe": "PTS",
+      "platform": "dspace",
+      "url_base": "https://repository.mercubuana.ac.id",
+      "oai_endpoint": null,
+      "search_url": "https://repository.mercubuana.ac.id/xmlui/discover",
+      "search_params": {"query": "{keyword}"},
+      "search_method": "GET",
+      "parser": "dspace"
+    },
+
+    {
+      "id": "gunadarma",
+      "nama": "Universitas Gunadarma",
+      "kota": "Depok",
+      "provinsi": "Jawa Barat",
+      "tipe": "PTS",
+      "platform": "custom",
+      "url_base": "https://repository.gunadarma.ac.id",
+      "oai_endpoint": null,
+      "search_url": "https://repository.gunadarma.ac.id/search",
+      "search_params": {"query": "{keyword}"},
+      "search_method": "GET",
+      "parser": "generic"
+    },
+
+    {
+      "id": "unjani",
+      "nama": "Universitas Jenderal Ahmad Yani",
+      "kota": "Bandung",
+      "provinsi": "Jawa Barat",
+      "tipe": "PTS",
+      "platform": "eprints",
+      "url_base": "https://repository.unjani.ac.id",
+      "oai_endpoint": null,
+      "search_url": "https://repository.unjani.ac.id/xmlui/discover",
+      "search_params": {"query": "{keyword}"},
+      "search_method": "GET",
+      "parser": "dspace"
+    },
+
+    {
+      "id": "stikombali",
+      "nama": "STIKOM Bali",
+      "kota": "Denpasar",
+      "provinsi": "Bali",
+      "tipe": "PTS",
+      "platform": "dspace",
+      "url_base": "https://repo.stikom-bali.ac.id",
+      "oai_endpoint": null,
+      "search_url": "https://repo.stikom-bali.ac.id/xmlui/discover",
+      "search_params": {"query": "{keyword}"},
+      "search_method": "GET",
+      "parser": "dspace"
+    },
+
+    {
+      "id": "ukdw",
+      "nama": "Universitas Kristen Duta Wacana",
+      "kota": "Yogyakarta",
+      "provinsi": "DI Yogyakarta",
+      "tipe": "PTS",
+      "platform": "eprints",
+      "url_base": "https://repository.ukdw.ac.id",
+      "oai_endpoint": null,
+      "search_url": "https://repository.ukdw.ac.id/xmlui/discover",
+      "search_params": {"query": "{keyword}"},
+      "search_method": "GET",
+      "parser": "dspace"
+    },
+
+    {
+      "id": "ukrida",
+      "nama": "Universitas Kristen Krida Wacana",
+      "kota": "Jakarta",
+      "provinsi": "DKI Jakarta",
+      "tipe": "PTS",
+      "platform": "eprints",
+      "url_base": "https://repository.ukrida.ac.id",
+      "oai_endpoint": null,
+      "search_url": "https://repository.ukrida.ac.id/xmlui/discover",
+      "search_params": {"query": "{keyword}"},
+      "search_method": "GET",
+      "parser": "dspace"
+    },
+
+    {
+      "id": "unika_soegijapranata",
+      "nama": "Universitas Katolik Soegijapranata",
+      "kota": "Semarang",
+      "provinsi": "Jawa Tengah",
+      "tipe": "PTS",
+      "platform": "eprints",
+      "url_base": "https://repository.unika.ac.id",
+      "oai_endpoint": null,
+      "search_url": "https://repository.unika.ac.id/index.php/search",
+      "search_params": {"q": "{keyword}"},
+      "search_method": "GET",
+      "parser": "generic"
+    },
+
+    {
+      "id": "untar",
+      "nama": "Universitas Tarumanagara",
+      "kota": "Jakarta",
+      "provinsi": "DKI Jakarta",
+      "tipe": "PTS",
+      "platform": "generic",
+      "url_base": "https://repository.untar.ac.id",
+      "oai_endpoint": null,
+      "search_url": "https://repository.untar.ac.id/xmlui/discover",
+      "search_params": {"query": "{keyword}"},
+      "search_method": "GET",
+      "parser": "dspace"
+    },
+
+    {
+      "id": "uta45",
+      "nama": "Universitas 17 Agustus 1945 Jakarta",
+      "kota": "Jakarta",
+      "provinsi": "DKI Jakarta",
+      "tipe": "PTS",
+      "platform": "eprints",
+      "url_base": "https://repository.uta45jakarta.ac.id",
+      "oai_endpoint": null,
+      "search_url": "https://repository.uta45jakarta.ac.id/cgi-bin/search.cgi",
+      "search_params": {"q": "{keyword}", "action_search": "Search"},
+      "search_method": "GET",
+      "parser": "eprints"
+    },
+
+    {
+      "id": "unissula",
+      "nama": "Universitas Islam Sultan Agung",
+      "kota": "Semarang",
+      "provinsi": "Jawa Tengah",
+      "tipe": "PTS",
+      "platform": "eprints",
+      "url_base": "https://repository.unissula.ac.id",
+      "oai_endpoint": "https://repository.unissula.ac.id/cgi/oai2",
+      "search_url": "https://repository.unissula.ac.id/cgi-bin/search/search.cgi",
+      "search_params": {"q": "{keyword}", "action_search": "Search"},
+      "search_method": "GET",
+      "parser": "eprints"
+    },
+
+    {
+      "id": "unusida",
+      "nama": "Universitas Nahdlatul Ulama Sidoarjo",
+      "kota": "Sidoarjo",
+      "provinsi": "Jawa Timur",
+      "tipe": "PTS",
+      "platform": "eprints",
+      "url_base": "https://repository.unusida.ac.id",
+      "oai_endpoint": null,
+      "search_url": "https://repository.unusida.ac.id/cgi-bin/search.cgi",
+      "search_params": {"q": "{keyword}", "action_search": "Search"},
+      "search_method": "GET",
+      "parser": "eprints"
+    },
+
+    {
+      "id": "stiki",
+      "nama": "STIKI Malang",
+      "kota": "Malang",
+      "provinsi": "Jawa Timur",
+      "tipe": "PTS",
+      "platform": "eprints",
+      "url_base": "https://repository.stiki.ac.id",
+      "oai_endpoint": null,
+      "search_url": "https://repository.stiki.ac.id/cgi-bin/search.cgi",
+      "search_params": {"q": "{keyword}", "action_search": "Search"},
+      "search_method": "GET",
+      "parser": "eprints"
+    },
+
+    {
+      "id": "polinema",
+      "nama": "Politeknik Negeri Malang",
+      "kota": "Malang",
+      "provinsi": "Jawa Timur",
+      "tipe": "PTN",
+      "platform": "eprints",
+      "url_base": "https://repository.polinema.ac.id",
+      "oai_endpoint": null,
+      "search_url": "https://repository.polinema.ac.id/cgi-bin/search.cgi",
+      "search_params": {"q": "{keyword}", "action_search": "Search"},
+      "search_method": "GET",
+      "parser": "eprints"
+    },
+
+    {
+      "id": "pens",
+      "nama": "Politeknik Elektronika Negeri Surabaya",
+      "kota": "Surabaya",
+      "provinsi": "Jawa Timur",
+      "tipe": "PTN",
+      "platform": "eprints",
+      "url_base": "https://repository.pens.ac.id",
+      "oai_endpoint": null,
+      "search_url": "https://repository.pens.ac.id/cgi-bin/search.cgi",
+      "search_params": {"q": "{keyword}", "action_search": "Search"},
+      "search_method": "GET",
+      "parser": "eprints"
+    },
+
+    {
+      "id": "poltekkes_sby",
+      "nama": "Politeknik Kesehatan Kemenkes Surabaya",
+      "kota": "Surabaya",
+      "provinsi": "Jawa Timur",
+      "tipe": "PTN",
+      "platform": "eprints",
+      "url_base": "https://repository.poltekkes-surabaya.ac.id",
+      "oai_endpoint": null,
+      "search_url": "https://repository.poltekkes-surabaya.ac.id/cgi-bin/search.cgi",
+      "search_params": {"q": "{keyword}", "action_search": "Search"},
+      "search_method": "GET",
+      "parser": "eprints"
+    },
+
+    {
+      "id": "umj",
+      "nama": "Universitas Muhammadiyah Jakarta",
+      "kota": "Jakarta",
+      "provinsi": "DKI Jakarta",
+      "tipe": "PTS",
+      "platform": "eprints",
+      "url_base": "https://repository.umj.ac.id",
+      "oai_endpoint": null,
+      "search_url": "https://repository.umj.ac.id/xmlui/discover",
+      "search_params": {"query": "{keyword}"},
+      "search_method": "GET",
+      "parser": "dspace"
+    },
+
+    {
+      "id": "unisma",
+      "nama": "Universitas Islam Malang",
+      "kota": "Malang",
+      "provinsi": "Jawa Timur",
+      "tipe": "PTS",
+      "platform": "eprints",
+      "url_base": "https://repository.unisma.ac.id",
+      "oai_endpoint": null,
+      "search_url": "https://repository.unisma.ac.id/cgi-bin/search.cgi",
+      "search_params": {"q": "{keyword}", "action_search": "Search"},
+      "search_method": "GET",
+      "parser": "eprints"
+    },
+
+    {
+      "id": "ubhara",
+      "nama": "Universitas Bhayangkara Jakarta Raya",
+      "kota": "Bekasi",
+      "provinsi": "Jawa Barat",
+      "tipe": "PTS",
+      "platform": "eprints",
+      "url_base": "https://repository.ubharajaya.ac.id",
+      "oai_endpoint": null,
+      "search_url": "https://repository.ubharajaya.ac.id/cgi-bin/search.cgi",
+      "search_params": {"q": "{keyword}", "action_search": "Search"},
+      "search_method": "GET",
+      "parser": "eprints"
+    }
+  ]
+}
