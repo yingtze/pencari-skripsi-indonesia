@@ -45,6 +45,9 @@ dist/
 Thumbs.db
 desktop.ini
 
+# ── Microsoft Office temporary files ────────────────────────────────
+~$*
+
 # ── Logs ─────────────────────────────────────────────────────────────
 *.log
 logs/
