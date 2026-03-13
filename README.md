@@ -62,40 +62,40 @@ pip install requests beautifulsoup4 lxml tqdm colorama openpyxl
 ### Pencarian Dasar
 
 ```bash
-python pencari_skripsi_v12.py --keyword "machine learning"
+python pencari_skripsi.py --keyword "machine learning"
 ```
 
 ### Dengan Filter
 
 ```bash
 # Cari di PTN wilayah Jawa Timur saja
-python pencari_skripsi_v12.py --keyword "ekonomi syariah" --tipe PTN --provinsi "jawa timur"
+python pencari_skripsi.py --keyword "ekonomi syariah" --tipe PTN --provinsi "jawa timur"
 
 # Pilih universitas spesifik
-python pencari_skripsi_v12.py --keyword "sistem informasi" --universitas ums umm umy
+python pencari_skripsi.py --keyword "sistem informasi" --universitas ums umm umy
 
 # Tampilkan hanya yang bisa diunduh penuh
-python pencari_skripsi_v12.py --keyword "hukum pidana" --hanya-full
+python pencari_skripsi.py --keyword "hukum pidana" --hanya-full
 ```
 
 ### Pilih Metode Fetch
 
 ```bash
 # OAI-PMH — lebih cepat dan terstruktur (direkomendasikan)
-python pencari_skripsi_v12.py --keyword "kesehatan masyarakat" --metode oai
+python pencari_skripsi.py --keyword "kesehatan masyarakat" --metode oai
 
 # HTML scraping — jangkauan lebih luas, cocok untuk repo yang tidak punya OAI
-python pencari_skripsi_v12.py --keyword "arsitektur" --metode html
+python pencari_skripsi.py --keyword "arsitektur" --metode html
 ```
 
 ### Simpan Hasil
 
 ```bash
 # Simpan ke CSV, JSON, dan Excel sekaligus (default)
-python pencari_skripsi_v12.py --keyword "pendidikan" --output hasil_pendidikan
+python pencari_skripsi.py --keyword "pendidikan" --output hasil_pendidikan
 
 # Hanya Excel
-python pencari_skripsi_v12.py --keyword "kimia" --format xlsx
+python pencari_skripsi.py --keyword "kimia" --format xlsx
 ```
 
 ### Mode Interaktif
@@ -103,17 +103,17 @@ python pencari_skripsi_v12.py --keyword "kimia" --format xlsx
 Tidak suka CLI? Jalankan mode tanya-jawab:
 
 ```bash
-python pencari_skripsi_v12.py --interactive
+python pencari_skripsi.py --interactive
 ```
 
 ### Lihat Daftar Universitas
 
 ```bash
 # Semua universitas yang didukung
-python pencari_skripsi_v12.py --list-universitas
+python pencari_skripsi.py --list-universitas
 
 # Filter berdasarkan tipe atau provinsi
-python pencari_skripsi_v12.py --list-universitas --tipe PTS --provinsi "jawa barat"
+python pencari_skripsi.py --list-universitas --tipe PTS --provinsi "jawa barat"
 ```
 
 ---
@@ -159,13 +159,13 @@ Status ditentukan berdasarkan sistem skor: script mencari indikator seperti `"fu
 
 ```
 📁 pencari-skripsi-indonesia/
-├── pencari_skripsi_v12.py   ← Script utama
+├── pencari_skripsi.py   ← Script utama
 ├── repositories.json         ← Data 75+ universitas (edit di sini untuk tambah kampus)
 ├── README.md
 └── .cache_skripsi/           ← Cache otomatis, dibuat saat pertama kali dijalankan
 ```
 
-> `pencari_skripsi_v12.py` dan `repositories.json` harus selalu berada di folder yang sama.
+> `pencari_skripsi.py` dan `repositories.json` harus selalu berada di folder yang sama.
 
 ---
 

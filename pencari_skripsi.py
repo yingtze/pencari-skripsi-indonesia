@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 ╔══════════════════════════════════════════════════════════════════╗
-║   PENCARI SKRIPSI FULL TEXT — Repository PT Indonesia  v1.2     ║
+║   PENCARI SKRIPSI FULL TEXT — Repository PT Indonesia  v1.2.1   ║
 ║   Mendukung 75+ universitas  |  OAI-PMH + HTML Scraping         ║
 ╚══════════════════════════════════════════════════════════════════╝
 
@@ -17,13 +17,21 @@ Fitur v1.2 (dibandingkan v1.1):
   ✓ OAI-PMH harvesting sebagai jalur utama (lebih andal & terstandar)
   ✓ Konfigurasi repository DIPISAH ke repositories.json (75+ PT)
   ✓ Resumption token support (harvest data ribuan rekaman)
-  ✓ Async concurrent request (jauh lebih cepat dengan asyncio)
+  ✓ Concurrent request (jauh lebih cepat dengan ThreadPoolExecutor)
   ✓ Cache lokal per-repository (tidak re-fetch data yang sama)
   ✓ Deteksi full text yang lebih cerdas (skor berbasis bobot)
   ✓ Filter lanjutan: tahun, provinsi, tipe PT (PTN/PTS)
   ✓ Output tambahan: Excel (XLSX) selain CSV dan JSON
   ✓ Mode interaktif & mode CLI
   ✓ Progress bar per-universitas + estimasi waktu
+
+Perbaikan v1.2.1:
+  ✓ Deteksi cover vs fulltext — tidak lagi salah ambil file cover sebagai fulltext
+  ✓ Verifikasi aksesibilitas PDF via HEAD request sebelum ditampilkan sebagai hasil
+  ✓ Deteksi redirect ke halaman login (pola DSpace/EPrints seperti USU, Unair, dll)
+  ✓ Parsing ukuran file untuk prioritaskan PDF terbesar (fulltext > cover)
+  ✓ Skor penalti tambahan untuk pola login-wall yang sebelumnya tidak terdeteksi
+  ✓ Status "locked" lebih akurat — tidak lagi false positive "full" untuk repo berembargo
 
 Kebutuhan:
     pip install requests beautifulsoup4 lxml tqdm colorama aiohttp openpyxl
@@ -126,6 +134,14 @@ SKOR_INDIKATOR = {
     "not.*available":           -7,
     "access.*denied":           -7,
     "under.*embargo":           -7,
+    # Pola khas DSpace/EPrints yang hanya sajikan cover
+    r"please.*login.*view":     -10,
+    r"login.*to.*access":       -10,
+    r"you.*must.*log.*in":      -10,
+    "authorization required":   -10,
+    "please login":             -9,
+    "silakan login":            -9,
+    "sign in to":               -9,
 }
 
 THRESHOLD_FULL = 15     # skor >= 15 → full
@@ -299,6 +315,194 @@ def tentukan_status(skor: int) -> str:
     if skor < 0:
         return "locked"
     return "unknown"
+
+
+# ─────────────────────────────────────────────────────────────────────
+#  DETEKSI PDF — COVER vs FULLTEXT vs LOCKED
+# ─────────────────────────────────────────────────────────────────────
+
+# Pola nama file/label yang menandakan ini HANYA cover, bukan fulltext
+POLA_COVER = re.compile(
+    r"cover|sampul|halaman.?judul|title.?page|hal\.?judul|cover\.pdf",
+    re.IGNORECASE
+)
+
+# Pola yang menandakan ini fulltext sesungguhnya
+POLA_FULLTEXT = re.compile(
+    r"full.?text|fulltext|full_text|naskah.?lengkap|skripsi.?full|"
+    r"tesis.?full|disertasi.?full|manuscript|document\.pdf|full\.pdf",
+    re.IGNORECASE
+)
+
+# URL atau teks yang menandakan perlu login untuk mengakses
+POLA_LOGIN_REDIRECT = re.compile(
+    r"login|signin|sign.in|shibboleth|cas\.(?:ac|edu|go)\.id|"
+    r"auth\..*redirect|/account/|/user/login",
+    re.IGNORECASE
+)
+
+# HTTP status yang sering muncul saat konten di-restrict
+STATUS_LOCKED = {401, 403}
+
+
+def ekstrak_pdf_dari_detail(soup: BeautifulSoup, base_url: str) -> tuple[str, str, str]:
+    """
+    Analisis halaman detail DSpace/EPrints untuk menemukan URL PDF fulltext.
+
+    Strategi (prioritas tinggi ke rendah):
+    1. Cari <a> berlabel "Fulltext" / "Full Text" / "Naskah Lengkap"
+    2. Cari semua link PDF, buang yang labelnya mengandung pola cover
+    3. Pilih PDF berukuran terbesar berdasarkan teks ukuran file (jika tersedia)
+    4. Fallback ke PDF pertama yang ditemukan
+
+    Mengembalikan (url_fulltext, url_cover, catatan).
+    """
+    semua_pdf = []
+
+    for a in soup.find_all("a", href=True):
+        href = a["href"]
+        is_pdf_link = (
+            ".pdf" in href.lower() or
+            re.search(r"/bitstream/|/retrieve/|/download/", href, re.I)
+        )
+        if not is_pdf_link:
+            continue
+
+        label = a.get_text(strip=True)
+        if not label:
+            parent_td = a.find_parent("td")
+            if parent_td:
+                label = parent_td.get_text(separator=" ", strip=True)
+
+        # Cari ukuran file di baris sekitar ("1.2Mb", "470Kb", "3.049Mb")
+        ukuran_kb = 0
+        parent = a.find_parent(["tr", "li", "div"])
+        if parent:
+            teks_baris = parent.get_text(separator=" ")
+            m = re.search(r"([\d.,]+)\s*(Kb|KB|Mb|MB|Gb|GB)", teks_baris)
+            if m:
+                nilai = float(m.group(1).replace(",", "."))
+                satuan = m.group(2).upper()
+                if "KB" in satuan:
+                    ukuran_kb = nilai
+                elif "MB" in satuan:
+                    ukuran_kb = nilai * 1024
+                elif "GB" in satuan:
+                    ukuran_kb = nilai * 1024 * 1024
+
+        url_abs = urljoin(base_url, href)
+        semua_pdf.append({
+            "url":         url_abs,
+            "label":       label,
+            "ukuran_kb":   ukuran_kb,
+            "is_cover":    bool(POLA_COVER.search(label) or POLA_COVER.search(href)),
+            "is_fulltext": bool(POLA_FULLTEXT.search(label) or POLA_FULLTEXT.search(href)),
+        })
+
+    if not semua_pdf:
+        return "", "", ""
+
+    url_cover = next((p["url"] for p in semua_pdf if p["is_cover"]), "")
+
+    # Prioritas 1: eksplisit berlabel fulltext
+    kandidat = [p for p in semua_pdf if p["is_fulltext"]]
+    # Prioritas 2: semua PDF yang bukan cover
+    if not kandidat:
+        kandidat = [p for p in semua_pdf if not p["is_cover"]]
+    # Prioritas 3: fallback semua
+    if not kandidat:
+        kandidat = semua_pdf
+
+    # Pilih yang ukurannya terbesar (fulltext hampir selalu jauh lebih besar dari cover)
+    kandidat.sort(key=lambda p: p["ukuran_kb"], reverse=True)
+    url_fulltext = kandidat[0]["url"]
+
+    catatan = ""
+    if len(semua_pdf) > 1 and url_cover:
+        catatan = f"Ditemukan {len(semua_pdf)} file PDF; cover dipisahkan dari fulltext"
+
+    return url_fulltext, url_cover, catatan
+
+
+def cek_akses_pdf(session: requests.Session, url_pdf: str,
+                  timeout: int = 10) -> tuple[bool, str]:
+    """
+    Verifikasi apakah URL PDF bisa diakses tanpa login.
+
+    Menggunakan HEAD request (tidak download isi), lalu cek:
+    - HTTP 401/403  → locked
+    - Redirect ke URL login → locked
+    - Content-Type bukan PDF → kemungkinan halaman login HTML → locked
+    - HTTP 200 + content-type application/pdf → bebas diakses
+
+    Mengembalikan (bisa_diakses: bool, alasan: str).
+    """
+    if not url_pdf:
+        return False, "URL kosong"
+
+    try:
+        resp = session.head(url_pdf, timeout=timeout, allow_redirects=True)
+
+        # Cek redirect chain
+        if resp.history:
+            for r in resp.history:
+                loc = r.headers.get("Location", "")
+                if POLA_LOGIN_REDIRECT.search(loc):
+                    return False, f"Redirect ke halaman login"
+
+        final_url = resp.url
+        if POLA_LOGIN_REDIRECT.search(final_url):
+            return False, "URL akhir mengandung pola login"
+
+        if resp.status_code in STATUS_LOCKED:
+            return False, f"HTTP {resp.status_code} — akses ditolak oleh server"
+
+        content_type = resp.headers.get("Content-Type", "").lower()
+
+        if resp.status_code == 200:
+            if "application/pdf" in content_type or "octet-stream" in content_type:
+                return True, "OK"
+            if "text/html" in content_type:
+                # HEAD tidak bisa bedakan HTML konten vs HTML login page.
+                # GET terbatas: baca 2KB pertama saja.
+                try:
+                    r_get = session.get(url_pdf, timeout=timeout,
+                                        stream=True, allow_redirects=True)
+                    potongan = b""
+                    for chunk in r_get.iter_content(2048):
+                        potongan += chunk
+                        break
+                    r_get.close()
+                    teks_awal = potongan.decode("utf-8", errors="ignore").lower()
+                    if POLA_LOGIN_REDIRECT.search(teks_awal) or \
+                       re.search(r"<form.*?login|input.*?password", teks_awal):
+                        return False, "Halaman login HTML (bukan file PDF)"
+                    if teks_awal.startswith("%pdf"):
+                        return True, "OK"
+                except Exception:
+                    pass
+                return False, "Server mengembalikan HTML, bukan PDF"
+            return True, f"OK ({content_type})"
+
+        return False, f"HTTP {resp.status_code}"
+
+    except requests.exceptions.SSLError:
+        try:
+            import urllib3
+            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+            resp = session.head(url_pdf, timeout=timeout,
+                                allow_redirects=True, verify=False)
+            if resp.status_code == 200:
+                ct = resp.headers.get("Content-Type", "").lower()
+                if "pdf" in ct or "octet" in ct:
+                    return True, "OK (SSL diabaikan)"
+            return False, f"SSL error, HTTP {resp.status_code}"
+        except Exception as e:
+            return False, f"SSL error: {e}"
+    except requests.exceptions.Timeout:
+        return False, "Timeout"
+    except Exception as e:
+        return False, f"Error: {e}"
 
 
 # ─────────────────────────────────────────────────────────────────────
@@ -666,15 +870,37 @@ class PencariSkripsi:
 
                 skor, bab = (0, [])
                 url_pdf = ""
+                url_cover = ""
+                catatan_pdf = ""
                 if detail_html:
                     d_soup = BeautifulSoup(detail_html, "lxml")
                     skor, bab = hitung_skor_full_text(d_soup.get_text())
-                    pdf_links = [a["href"] for a in
-                                 d_soup.find_all("a", href=True)
-                                 if ".pdf" in a["href"].lower()]
-                    if pdf_links:
-                        url_pdf = urljoin(univ["url_base"], pdf_links[0])
-                        skor += 5  # ada PDF langsung
+
+                    # ── Patch v1.2.1: ekstrak PDF dengan bedakan cover vs fulltext ──
+                    url_pdf, url_cover, catatan_pdf = ekstrak_pdf_dari_detail(
+                        d_soup, univ["url_base"]
+                    )
+
+                    if url_pdf:
+                        # Verifikasi aksesibilitas — HEAD request ringan
+                        bisa_diakses, alasan = cek_akses_pdf(self.session, url_pdf)
+                        if bisa_diakses:
+                            skor += 5  # bonus: PDF confirmed accessible
+                        else:
+                            # PDF ada tapi terkunci
+                            skor -= 8
+                            catatan_pdf = f"PDF ditemukan tapi terkunci: {alasan}"
+                            url_pdf = ""  # jangan tampilkan URL yang tidak bisa dibuka
+
+                # Skor akhir setelah verifikasi menentukan status
+                status = tentukan_status(skor)
+
+                # Jika semua PDF locked dan skor sudah negatif, pastikan marked locked
+                if not url_pdf and catatan_pdf and "terkunci" in catatan_pdf:
+                    if status not in ("locked",):
+                        status = "locked"
+
+                catatan_gabung = " | ".join(filter(None, [catatan_pdf]))
 
                 skripsi = Skripsi(
                     universitas=univ["nama"],
@@ -684,10 +910,11 @@ class PencariSkripsi:
                     tahun=item.get("tahun", ""),
                     url_detail=item["url"],
                     url_pdf=url_pdf,
-                    status_full_text=tentukan_status(skor),
+                    status_full_text=status,
                     skor_full_text=skor,
                     bab_terdeteksi=bab,
                     metode_fetch="html",
+                    catatan=catatan_gabung,
                 )
                 hasil.append(skripsi)
 
@@ -757,10 +984,18 @@ class PencariSkripsi:
 # ─────────────────────────────────────────────────────────────────────
 
 IKON_STATUS = {
-    "full": f"{Fore.GREEN}[✓ FULL]{Style.RESET_ALL}",
+    "full":    f"{Fore.GREEN}[✓ FULL]{Style.RESET_ALL}",
     "partial": f"{Fore.YELLOW}[~ PARTIAL]{Style.RESET_ALL}",
-    "locked": f"{Fore.RED}[✗ LOCKED]{Style.RESET_ALL}",
-    "unknown": f"{Fore.WHITE}[? ???]{Style.RESET_ALL}",
+    "locked":  f"{Fore.RED}[✗ TERKUNCI]{Style.RESET_ALL}",
+    "unknown": f"{Fore.WHITE}[? TIDAK DIKETAHUI]{Style.RESET_ALL}",
+}
+
+# Label catatan standar yang ditampilkan ke user
+CATATAN_AKSES = {
+    "full":    "",
+    "partial": "Sebagian bab tersedia — cek halaman detail untuk memastikan",
+    "locked":  "⚠ Akses dibatasi oleh institusi — diperlukan login atau akses kampus",
+    "unknown": "Status tidak dapat ditentukan secara otomatis — cek manual",
 }
 
 
@@ -779,45 +1014,94 @@ def cetak_ringkasan(hasil: list[Skripsi]):
     print(f"  Tidak jelas (?) : {hitungan['unknown']}")
     print(f"{'═'*62}")
 
-    akses = [h for h in hasil if h.status_full_text in ("full", "partial")]
-    if not akses:
-        print(f"\n  {Fore.YELLOW}Tidak ada skripsi yang bisa diakses penuh.{Style.RESET_ALL}")
+    akses    = [h for h in hasil if h.status_full_text in ("full", "partial")]
+    terkunci = [h for h in hasil if h.status_full_text == "locked"]
+
+    if not akses and not terkunci:
+        print(f"\n  {Fore.YELLOW}Tidak ada skripsi yang ditemukan.{Style.RESET_ALL}")
         return
 
-    print(f"\n  {Fore.GREEN}Skripsi yang dapat diakses:{Style.RESET_ALL}")
-    for i, h in enumerate(akses[:30], 1):
-        ikon = IKON_STATUS.get(h.status_full_text, "")
-        print(f"\n  {i:>3}. {ikon} {h.judul[:68]}")
-        print(f"       📍 {h.universitas}")
-        if h.penulis:
-            print(f"       👤 {h.penulis}")
-        if h.tahun:
-            print(f"       📅 {h.tahun}")
-        print(f"       🔗 {h.url_detail}")
-        if h.url_pdf:
-            print(f"       📄 {h.url_pdf}")
-        if h.bab_terdeteksi:
-            print(f"       📖 Bab: {', '.join(h.bab_terdeteksi[:4])}")
-        print(f"       📊 Skor: {h.skor_full_text}  |  Metode: {h.metode_fetch}")
+    # ── Bagian 1: Skripsi yang bisa diakses ─────────────────────────────
+    if akses:
+        print(f"\n  {Fore.GREEN}● Skripsi yang dapat diakses ({len(akses)}){Style.RESET_ALL}")
+        print(f"  {'─'*58}")
+        for i, h in enumerate(akses[:30], 1):
+            ikon = IKON_STATUS.get(h.status_full_text, "")
+            print(f"\n  {i:>3}. {ikon} {h.judul[:65]}")
+            print(f"       📍 {h.universitas}")
+            if h.penulis:
+                print(f"       👤 {h.penulis}")
+            if h.tahun:
+                print(f"       📅 {h.tahun}")
+            print(f"       🔗 {h.url_detail}")
+            if h.url_pdf:
+                print(f"       📄 PDF: {h.url_pdf}")
+            if h.bab_terdeteksi:
+                print(f"       📖 Bab: {', '.join(h.bab_terdeteksi[:4])}")
+            # Catatan dari proses verifikasi (cover dipisah, dll)
+            if h.catatan and "terkunci" not in h.catatan.lower():
+                print(f"       💬 {h.catatan}")
+            print(f"       📊 Skor: {h.skor_full_text}  |  Metode: {h.metode_fetch}")
+
+    # ── Bagian 2: Skripsi yang terkunci — tetap ditampilkan dengan keterangan ──
+    if terkunci:
+        print(f"\n\n  {Fore.RED}● Terkunci / akses dibatasi institusi ({len(terkunci)}){Style.RESET_ALL}")
+        print(f"  {'─'*58}")
+        print(f"  {Fore.RED}⚠  Skripsi berikut ditemukan di repository tapi tidak bisa")
+        print(f"     diunduh tanpa login atau akses jaringan kampus.{Style.RESET_ALL}")
+        for i, h in enumerate(terkunci[:20], 1):
+            print(f"\n  {i:>3}. {IKON_STATUS['locked']} {h.judul[:65]}")
+            print(f"       📍 {h.universitas}")
+            if h.penulis:
+                print(f"       👤 {h.penulis}")
+            if h.tahun:
+                print(f"       📅 {h.tahun}")
+            print(f"       🔗 {h.url_detail}")
+            # Alasan spesifik dari cek_akses_pdf
+            alasan_detail = h.catatan if h.catatan else ""
+            if alasan_detail:
+                print(f"       🔒 {alasan_detail}")
+            else:
+                print(f"       🔒 {CATATAN_AKSES['locked']}")
 
 
 def ekspor_csv(hasil: list[Skripsi], path: str):
     fields = ["universitas", "kode_univ", "judul", "penulis", "tahun",
-              "program_studi", "status_full_text", "skor_full_text",
-              "bab_terdeteksi", "url_detail", "url_pdf", "doi",
-              "metode_fetch", "catatan", "timestamp_cari"]
+              "program_studi", "status_full_text", "keterangan_akses",
+              "skor_full_text", "bab_terdeteksi", "url_detail", "url_pdf",
+              "doi", "metode_fetch", "catatan", "timestamp_cari"]
     with open(path, "w", newline="", encoding="utf-8-sig") as f:
         writer = csv.DictWriter(f, fieldnames=fields)
         writer.writeheader()
         for h in hasil:
             row = asdict(h)
             row["bab_terdeteksi"] = " | ".join(h.bab_terdeteksi)
+            # Kolom keterangan_akses: gabungkan label standar + alasan spesifik
+            ket_standar = CATATAN_AKSES.get(h.status_full_text, "")
+            ket_spesifik = h.catatan or ""
+            if ket_spesifik and ket_standar:
+                row["keterangan_akses"] = f"{ket_standar} | Detail: {ket_spesifik}"
+            elif ket_spesifik:
+                row["keterangan_akses"] = ket_spesifik
+            else:
+                row["keterangan_akses"] = ket_standar
             writer.writerow({k: row[k] for k in fields})
     print(f"  {Fore.GREEN}[✓]{Style.RESET_ALL} CSV   → {path}")
 
 
 def ekspor_json(hasil: list[Skripsi], path: str):
-    data = [asdict(h) for h in hasil]
+    data = []
+    for h in hasil:
+        row = asdict(h)
+        ket_standar  = CATATAN_AKSES.get(h.status_full_text, "")
+        ket_spesifik = h.catatan or ""
+        if ket_spesifik and ket_standar:
+            row["keterangan_akses"] = f"{ket_standar} | Detail: {ket_spesifik}"
+        elif ket_spesifik:
+            row["keterangan_akses"] = ket_spesifik
+        else:
+            row["keterangan_akses"] = ket_standar
+        data.append(row)
     with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
     print(f"  {Fore.GREEN}[✓]{Style.RESET_ALL} JSON  → {path}")
@@ -839,33 +1123,52 @@ def ekspor_xlsx(hasil: list[Skripsi], path: str):
     PARTIAL_FILL = PatternFill("solid", fgColor="FFF2CC")
 
     headers = ["No", "Universitas", "Judul", "Penulis", "Tahun",
-               "Status", "Skor", "URL Detail", "URL PDF",
-               "Bab Terdeteksi", "Metode"]
+               "Status", "Keterangan Akses", "Skor",
+               "URL Detail", "URL PDF", "Bab Terdeteksi", "Metode"]
     ws.append(headers)
     for cell in ws[1]:
         cell.font = HEADER_FONT
         cell.fill = HEADER_FILL
         cell.alignment = Alignment(horizontal="center")
 
+    LOCKED_FILL  = PatternFill("solid", fgColor="FCE4D6")
+
     for i, h in enumerate(hasil, 1):
+        ket_standar  = CATATAN_AKSES.get(h.status_full_text, "")
+        ket_spesifik = h.catatan or ""
+        if ket_spesifik and ket_standar:
+            keterangan = f"{ket_standar} | {ket_spesifik}"
+        elif ket_spesifik:
+            keterangan = ket_spesifik
+        else:
+            keterangan = ket_standar
+
         row = [
             i, h.universitas, h.judul, h.penulis, h.tahun,
-            h.status_full_text, h.skor_full_text,
+            h.status_full_text, keterangan, h.skor_full_text,
             h.url_detail, h.url_pdf,
             " | ".join(h.bab_terdeteksi[:5]),
             h.metode_fetch,
         ]
         ws.append(row)
         last_row = ws.max_row
+
+        # Warna baris berdasarkan status
         if h.status_full_text == "full":
             for cell in ws[last_row]:
                 cell.fill = FULL_FILL
         elif h.status_full_text == "partial":
             for cell in ws[last_row]:
                 cell.fill = PARTIAL_FILL
+        elif h.status_full_text == "locked":
+            for cell in ws[last_row]:
+                cell.fill = LOCKED_FILL
 
-        # Link aktif untuk URL
-        for col_idx in [8, 9]:
+        # Kolom keterangan — wrap text agar terbaca
+        ws.cell(row=last_row, column=7).alignment = Alignment(wrap_text=True)
+
+        # Link aktif untuk URL (kolom 9=URL Detail, 10=URL PDF)
+        for col_idx in [9, 10]:
             cell = ws.cell(row=last_row, column=col_idx)
             if cell.value and cell.value.startswith("http"):
                 cell.hyperlink = cell.value
