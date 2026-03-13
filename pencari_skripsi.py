@@ -37,12 +37,12 @@ Kebutuhan:
     pip install requests beautifulsoup4 lxml tqdm colorama aiohttp openpyxl
 
 Penggunaan:
-    python pencari_skripsi_v12.py --keyword "machine learning" --max 50
-    python pencari_skripsi_v12.py --keyword "ekonomi" --tipe PTN --provinsi "jawa timur"
-    python pencari_skripsi_v12.py --keyword "hukum" --metode oai --hanya-full
-    python pencari_skripsi_v12.py --keyword "ai" --universitas ums umm umy --max 30
-    python pencari_skripsi_v12.py --list-universitas
-    python pencari_skripsi_v12.py --interactive
+    python pencari_skripsi.py --keyword "machine learning" --max 50
+    python pencari_skripsi.py --keyword "ekonomi" --tipe PTN --provinsi "jawa timur"
+    python pencari_skripsi.py --keyword "hukum" --metode oai --hanya-full
+    python pencari_skripsi.py --keyword "ai" --universitas ums umm umy --max 30
+    python pencari_skripsi.py --list-universitas
+    python pencari_skripsi.py --interactive
 """
 
 import argparse
@@ -1242,12 +1242,12 @@ def main():
         formatter_class=argparse.RawTextHelpFormatter,
         epilog="""
 Contoh:
-  python pencari_skripsi_v12.py --keyword "machine learning"
-  python pencari_skripsi_v12.py --keyword "ekonomi" --tipe PTN --provinsi "jawa timur"
-  python pencari_skripsi_v12.py --keyword "hukum" --metode oai --hanya-full
-  python pencari_skripsi_v12.py --keyword "AI" --universitas ums umm umy --max 30
-  python pencari_skripsi_v12.py --list-universitas --tipe PTS
-  python pencari_skripsi_v12.py --interactive
+  python pencari_skripsi.py --keyword "machine learning"
+  python pencari_skripsi.py --keyword "ekonomi" --tipe PTN --provinsi "jawa timur"
+  python pencari_skripsi.py --keyword "hukum" --metode oai --hanya-full
+  python pencari_skripsi.py --keyword "AI" --universitas ums umm umy --max 30
+  python pencari_skripsi.py --list-universitas --tipe PTS
+  python pencari_skripsi.py --interactive
         """
     )
 
