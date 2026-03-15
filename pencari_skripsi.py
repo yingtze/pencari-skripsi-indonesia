@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
 ╔══════════════════════════════════════════════════════════════════╗
-║   PENCARI SKRIPSI FULL TEXT — Repository PT Indonesia  v1.2.1   ║
-║   Mendukung 75+ universitas  |  OAI-PMH + HTML Scraping         ║
+║   PENCARI SKRIPSI FULL TEXT — Repository PT Indonesia  v1.3     ║
+║   Mendukung 75+ universitas  |  OAI-PMH + HTML + PDF Analyzer   ║
 ╚══════════════════════════════════════════════════════════════════╝
 
 Inspirasi & referensi teknis:
@@ -13,28 +13,58 @@ Inspirasi & referensi teknis:
   - oaiharvest (PyPI) — registry & resumption token handling
   - news-scraper Indonesia (binsarjr) — pola multi-source scraping
 
-Fitur v1.2 (dibandingkan v1.1):
-  ✓ OAI-PMH harvesting sebagai jalur utama (lebih andal & terstandar)
-  ✓ Konfigurasi repository DIPISAH ke repositories.json (75+ PT)
-  ✓ Resumption token support (harvest data ribuan rekaman)
-  ✓ Concurrent request (jauh lebih cepat dengan ThreadPoolExecutor)
-  ✓ Cache lokal per-repository (tidak re-fetch data yang sama)
-  ✓ Deteksi full text yang lebih cerdas (skor berbasis bobot)
-  ✓ Filter lanjutan: tahun, provinsi, tipe PT (PTN/PTS)
-  ✓ Output tambahan: Excel (XLSX) selain CSV dan JSON
-  ✓ Mode interaktif & mode CLI
+──────────────────────────────────────────────────────────────────
+ RIWAYAT VERSI
+──────────────────────────────────────────────────────────────────
+
+v1.3.0 — 2025-03-15
+  ✓ Modul pdf_analyzer.py — analisis konten PDF secara langsung
+  ✓ HTTP Range request: unduh hanya ~250KB (awal+akhir), bukan file penuh
+  ✓ Deteksi 12 bagian struktural skripsi di dalam isi PDF (via pdfminer.six)
+  ✓ Mode multi-file: deteksi repository yang memecah skripsi per bab,
+    klasifikasi tiap file, verifikasi akses satu per satu
+  ✓ Status "full" hanya diberikan jika bab 1/3/4/5 + daftar pustaka
+    terdeteksi di dalam PDF (bukan sekadar label di HTML)
+  ✓ Bonus skor diperbarui: +20 untuk full, +10 untuk partial (sebelumnya +5)
+  ✓ Field baru di dataclass Skripsi: pdf_analisis_status, bab_pdf,
+    url_per_bab, bab_terkunci, estimasi_halaman, pdf_analisis_catatan
+  ✓ Kolom baru di output CSV dan Excel
+  ✓ Fallback otomatis ke HEAD request jika pdfminer.six tidak terinstall
+
+v1.2.1 — 2025-01-20
+  ✓ Deteksi cover vs fulltext — tidak lagi salah ambil cover sebagai fulltext
+  ✓ Verifikasi aksesibilitas PDF via HEAD request sebelum ditampilkan
+  ✓ Deteksi redirect ke halaman login (pola DSpace/EPrints: USU, Unair, dll)
+  ✓ Parsing ukuran file untuk prioritaskan PDF terbesar (fulltext > cover)
+  ✓ Skor penalti tambahan untuk pola login-wall yang belum terdeteksi
+  ✓ Status "locked" lebih akurat — tidak lagi false positive untuk repo embargo
+
+v1.2.0 — 2025-01-10
+  ✓ OAI-PMH harvesting sebagai jalur utama (lebih andal dari scraping HTML)
+  ✓ Konfigurasi repository dipisah ke repositories.json (75+ PT)
+  ✓ Resumption token support untuk harvest ribuan rekaman
+  ✓ Concurrent request dengan ThreadPoolExecutor
+  ✓ Cache lokal per-repository (TTL 24 jam)
+  ✓ Filter lanjutan: provinsi, tipe PT (PTN/PTS/Politeknik)
+  ✓ Output Excel (XLSX) dengan color coding per status
+  ✓ Mode interaktif (--interactive)
   ✓ Progress bar per-universitas + estimasi waktu
 
-Perbaikan v1.2.1:
-  ✓ Deteksi cover vs fulltext — tidak lagi salah ambil file cover sebagai fulltext
-  ✓ Verifikasi aksesibilitas PDF via HEAD request sebelum ditampilkan sebagai hasil
-  ✓ Deteksi redirect ke halaman login (pola DSpace/EPrints seperti USU, Unair, dll)
-  ✓ Parsing ukuran file untuk prioritaskan PDF terbesar (fulltext > cover)
-  ✓ Skor penalti tambahan untuk pola login-wall yang sebelumnya tidak terdeteksi
-  ✓ Status "locked" lebih akurat — tidak lagi false positive "full" untuk repo berembargo
+v1.1.0 — 2024-12-01
+  ✓ Dukungan platform DSpace dan SLiMS/Senayan
+  ✓ Output JSON selain CSV
+  ✓ Parameter --hanya-full
+  ✓ Parser EPrints lebih robust dengan multiple CSS selector fallback
+
+v1.0.0 — 2024-11-01
+  ✓ Rilis pertama — 40+ repository EPrints
+  ✓ Deteksi full text berbasis keyword HTML, output CSV, cache file
+
+──────────────────────────────────────────────────────────────────
 
 Kebutuhan:
-    pip install requests beautifulsoup4 lxml tqdm colorama aiohttp openpyxl
+    pip install requests beautifulsoup4 lxml tqdm colorama openpyxl
+    pip install pdfminer.six        # opsional, untuk analisis isi PDF
 
 Penggunaan:
     python pencari_skripsi.py --keyword "machine learning" --max 50
@@ -80,6 +110,20 @@ from tqdm import tqdm
 from colorama import init, Fore, Style
 init(autoreset=True)
 
+# ── PDF Analyzer (modul analisis konten PDF) ─────────────────────────
+try:
+    from pdf_analyzer import (
+        analisis_penuh,
+        HasilAnalisisPDF,
+        format_bab_list,
+        format_url_per_bab,
+        PDFMINER_TERSEDIA,
+    )
+    PDF_ANALYZER_TERSEDIA = True
+except ImportError:
+    PDF_ANALYZER_TERSEDIA = False
+    PDFMINER_TERSEDIA     = False
+
 try:
     import openpyxl
     XLSX_AVAILABLE = True
@@ -87,7 +131,7 @@ except ImportError:
     XLSX_AVAILABLE = False
 
 # ── Konstanta ────────────────────────────────────────────────────────
-VERSION = "1.2"
+VERSION = "1.3"
 SCRIPT_DIR = Path(__file__).parent
 REPO_CONFIG = SCRIPT_DIR / "repositories.json"
 CACHE_DIR = SCRIPT_DIR / ".cache_skripsi"
@@ -170,6 +214,13 @@ class Skripsi:
     metode_fetch: str = "html"           # oai / html
     catatan: str = ""
     timestamp_cari: str = field(default_factory=lambda: datetime.now().isoformat())
+    # ── Field hasil analisis konten PDF (diisi oleh pdf_analyzer) ────
+    pdf_analisis_status: str = ""
+    bab_pdf: list = field(default_factory=list)
+    url_per_bab: dict = field(default_factory=dict)
+    bab_terkunci: list = field(default_factory=list)
+    estimasi_halaman: int = 0
+    pdf_analisis_catatan: str = ""
 
 
 # ─────────────────────────────────────────────────────────────────────
@@ -881,16 +932,40 @@ class PencariSkripsi:
                         d_soup, univ["url_base"]
                     )
 
+                    pdf_analisis = None
                     if url_pdf:
-                        # Verifikasi aksesibilitas — HEAD request ringan
-                        bisa_diakses, alasan = cek_akses_pdf(self.session, url_pdf)
-                        if bisa_diakses:
-                            skor += 5  # bonus: PDF confirmed accessible
+                        if PDF_ANALYZER_TERSEDIA:
+                            # ── Analisis mendalam konten PDF ─────────────────
+                            pdf_analisis = analisis_penuh(
+                                session     = self.session,
+                                url_pdf     = url_pdf,
+                                detail_soup = d_soup,
+                                base_url    = univ["url_base"],
+                                delay       = self.delay * 0.4,
+                            )
+                            if pdf_analisis.status == "locked":
+                                skor -= 8
+                                catatan_pdf = f"PDF terkunci: {pdf_analisis.catatan_teknis}"
+                                url_pdf = ""
+                            elif pdf_analisis.status == "full":
+                                skor += 20
+                                if pdf_analisis.bab_dari_pdf:
+                                    bab = pdf_analisis.bab_dari_pdf
+                            elif pdf_analisis.status == "partial":
+                                skor += 10
+                                if pdf_analisis.bab_dari_pdf:
+                                    bab = pdf_analisis.bab_dari_pdf
+                            else:
+                                skor += 5   # PDF accessible, konten tidak terbaca
                         else:
-                            # PDF ada tapi terkunci
-                            skor -= 8
-                            catatan_pdf = f"PDF ditemukan tapi terkunci: {alasan}"
-                            url_pdf = ""  # jangan tampilkan URL yang tidak bisa dibuka
+                            # Fallback: HEAD request saja (perilaku v1.2.1)
+                            bisa_diakses, alasan = cek_akses_pdf(self.session, url_pdf)
+                            if bisa_diakses:
+                                skor += 5
+                            else:
+                                skor -= 8
+                                catatan_pdf = f"PDF ditemukan tapi terkunci: {alasan}"
+                                url_pdf = ""
 
                 # Skor akhir setelah verifikasi menentukan status
                 status = tentukan_status(skor)
@@ -903,18 +978,25 @@ class PencariSkripsi:
                 catatan_gabung = " | ".join(filter(None, [catatan_pdf]))
 
                 skripsi = Skripsi(
-                    universitas=univ["nama"],
-                    kode_univ=univ["id"],
-                    judul=item["judul"],
-                    penulis=item.get("penulis", ""),
-                    tahun=item.get("tahun", ""),
-                    url_detail=item["url"],
-                    url_pdf=url_pdf,
-                    status_full_text=status,
-                    skor_full_text=skor,
-                    bab_terdeteksi=bab,
-                    metode_fetch="html",
-                    catatan=catatan_gabung,
+                    universitas      = univ["nama"],
+                    kode_univ        = univ["id"],
+                    judul            = item["judul"],
+                    penulis          = item.get("penulis", ""),
+                    tahun            = item.get("tahun", ""),
+                    url_detail       = item["url"],
+                    url_pdf          = url_pdf,
+                    status_full_text = status,
+                    skor_full_text   = skor,
+                    bab_terdeteksi   = bab,
+                    metode_fetch     = "html",
+                    catatan          = catatan_gabung,
+                    # ── Hasil analisis konten PDF ────────────────────
+                    pdf_analisis_status  = pdf_analisis.status if pdf_analisis else "",
+                    bab_pdf              = pdf_analisis.bab_dari_pdf if pdf_analisis else [],
+                    url_per_bab          = pdf_analisis.url_per_bab if pdf_analisis else {},
+                    bab_terkunci         = pdf_analisis.bab_terkunci if pdf_analisis else [],
+                    estimasi_halaman     = pdf_analisis.estimasi_halaman if pdf_analisis else 0,
+                    pdf_analisis_catatan = pdf_analisis.catatan_teknis if pdf_analisis else "",
                 )
                 hasil.append(skripsi)
 
@@ -1036,8 +1118,16 @@ def cetak_ringkasan(hasil: list[Skripsi]):
             print(f"       🔗 {h.url_detail}")
             if h.url_pdf:
                 print(f"       📄 PDF: {h.url_pdf}")
-            if h.bab_terdeteksi:
+            # Tampilan hasil analisis konten PDF
+            if h.bab_pdf:
+                print(f"       📑 Bab (dari PDF): {format_bab_list(h.bab_pdf)}")
+            elif h.bab_terdeteksi:
                 print(f"       📖 Bab: {', '.join(h.bab_terdeteksi[:4])}")
+            if h.url_per_bab:
+                print(f"       📂 Multi-file: {len(h.url_per_bab)} bab tersedia")
+                print(format_url_per_bab(h.url_per_bab, h.bab_terkunci))
+            if h.estimasi_halaman > 0:
+                print(f"       📏 Estimasi: ~{h.estimasi_halaman} halaman")
             # Catatan dari proses verifikasi (cover dipisah, dll)
             if h.catatan and "terkunci" not in h.catatan.lower():
                 print(f"       💬 {h.catatan}")
@@ -1069,13 +1159,18 @@ def ekspor_csv(hasil: list[Skripsi], path: str):
     fields = ["universitas", "kode_univ", "judul", "penulis", "tahun",
               "program_studi", "status_full_text", "keterangan_akses",
               "skor_full_text", "bab_terdeteksi", "url_detail", "url_pdf",
-              "doi", "metode_fetch", "catatan", "timestamp_cari"]
+              "doi", "metode_fetch", "catatan", "timestamp_cari",
+              "pdf_analisis_status", "bab_pdf", "url_per_bab",
+              "bab_terkunci", "estimasi_halaman", "pdf_analisis_catatan"]
     with open(path, "w", newline="", encoding="utf-8-sig") as f:
         writer = csv.DictWriter(f, fieldnames=fields)
         writer.writeheader()
         for h in hasil:
             row = asdict(h)
             row["bab_terdeteksi"] = " | ".join(h.bab_terdeteksi)
+            row["bab_pdf"]        = " | ".join(h.bab_pdf) if h.bab_pdf else ""
+            row["url_per_bab"]    = json.dumps(h.url_per_bab, ensure_ascii=False) if h.url_per_bab else ""
+            row["bab_terkunci"]   = " | ".join(h.bab_terkunci) if h.bab_terkunci else ""
             # Kolom keterangan_akses: gabungkan label standar + alasan spesifik
             ket_standar = CATATAN_AKSES.get(h.status_full_text, "")
             ket_spesifik = h.catatan or ""
@@ -1123,8 +1218,9 @@ def ekspor_xlsx(hasil: list[Skripsi], path: str):
     PARTIAL_FILL = PatternFill("solid", fgColor="FFF2CC")
 
     headers = ["No", "Universitas", "Judul", "Penulis", "Tahun",
-               "Status", "Keterangan Akses", "Skor",
-               "URL Detail", "URL PDF", "Bab Terdeteksi", "Metode"]
+               "Status", "Status PDF", "Keterangan Akses", "Skor",
+               "URL Detail", "URL PDF", "Bab (HTML)", "Bab (dari PDF)",
+               "Multi-file", "Est. Halaman", "Metode"]
     ws.append(headers)
     for cell in ws[1]:
         cell.font = HEADER_FONT
@@ -1145,9 +1241,14 @@ def ekspor_xlsx(hasil: list[Skripsi], path: str):
 
         row = [
             i, h.universitas, h.judul, h.penulis, h.tahun,
-            h.status_full_text, keterangan, h.skor_full_text,
+            h.status_full_text,
+            h.pdf_analisis_status,
+            keterangan, h.skor_full_text,
             h.url_detail, h.url_pdf,
             " | ".join(h.bab_terdeteksi[:5]),
+            " | ".join(h.bab_pdf[:5]) if h.bab_pdf else "",
+            f"{len(h.url_per_bab)} file" if h.url_per_bab else "",
+            h.estimasi_halaman if h.estimasi_halaman else "",
             h.metode_fetch,
         ]
         ws.append(row)
@@ -1242,12 +1343,12 @@ def main():
         formatter_class=argparse.RawTextHelpFormatter,
         epilog="""
 Contoh:
-  python pencari_skripsi.py --keyword "machine learning"
-  python pencari_skripsi.py --keyword "ekonomi" --tipe PTN --provinsi "jawa timur"
-  python pencari_skripsi.py --keyword "hukum" --metode oai --hanya-full
-  python pencari_skripsi.py --keyword "AI" --universitas ums umm umy --max 30
-  python pencari_skripsi.py --list-universitas --tipe PTS
-  python pencari_skripsi.py --interactive
+  python pencari_skripsi_v12.py --keyword "machine learning"
+  python pencari_skripsi_v12.py --keyword "ekonomi" --tipe PTN --provinsi "jawa timur"
+  python pencari_skripsi_v12.py --keyword "hukum" --metode oai --hanya-full
+  python pencari_skripsi_v12.py --keyword "AI" --universitas ums umm umy --max 30
+  python pencari_skripsi_v12.py --list-universitas --tipe PTS
+  python pencari_skripsi_v12.py --interactive
         """
     )
 

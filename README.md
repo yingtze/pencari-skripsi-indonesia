@@ -9,6 +9,7 @@ Cukup satu perintah, script ini yang kerja.
 
 [![Python](https://img.shields.io/badge/Python-3.8%2B-blue?logo=python&logoColor=white)](https://python.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Version](https://img.shields.io/badge/Versi-1.3.0-informational)](CHANGELOG.md)
 [![Universitas](https://img.shields.io/badge/Universitas-75%2B-orange)](repositories.json)
 [![Platform](https://img.shields.io/badge/Platform-EPrints%20%7C%20DSpace%20%7C%20SLiMS-purple)](repositories.json)
 
@@ -33,7 +34,9 @@ Siapapun yang pernah riset atau nulis skripsi pasti tahu frustrasinya:
 
 - 🔍 **75+ repository** PTN, PTS, dan Politeknik dari Sabang sampai Merauke
 - 📡 **OAI-PMH harvesting** — protokol standar EPrints & DSpace, lebih andal dari scraping biasa
-- 🎯 **Deteksi full text berbasis skor** — bukan sekadar cek ada/tidaknya PDF, tapi menganalisis keberadaan tiap bab secara terpisah
+- 🔬 **Analisis konten PDF langsung** — baca isi file PDF, deteksi heading bab di dalam dokumen, bukan cuma label di HTML
+- 📂 **Deteksi multi-file per bab** — otomatis kenali repository yang pecah skripsi jadi `bab1.pdf`, `bab2.pdf`, dst., lalu verifikasi tiap file
+- 🎯 **Status full text akurat** — `FULL` hanya diberikan jika Bab 1, 3, 4, 5, dan Daftar Pustaka **terdeteksi di dalam PDF**
 - ⚡ **Concurrent fetch** — cari di beberapa universitas secara paralel, lebih cepat
 - 💾 **Cache 24 jam** — tidak re-fetch halaman yang sama, hemat bandwidth dan waktu
 - 📊 **Output lengkap** — CSV, JSON, dan Excel berwarna (hijau = full text, kuning = partial)
@@ -49,11 +52,16 @@ Siapapun yang pernah riset atau nulis skripsi pasti tahu frustrasinya:
 git clone https://github.com/yingtze/pencari-skripsi-indonesia.git
 cd pencari-skripsi-indonesia
 
-# 2. Install dependensi
+# 2. Install dependensi wajib
 pip install requests beautifulsoup4 lxml tqdm colorama openpyxl
+
+# 3. Install dependensi opsional — untuk analisis konten PDF (direkomendasikan)
+pip install pdfminer.six
 ```
 
 > Butuh Python 3.8 atau lebih baru. Cek versi Python kamu dengan `python --version`.
+>
+> Tanpa `pdfminer.six`, script tetap berjalan normal tapi deteksi full text hanya berbasis HTML — tidak membaca isi PDF secara langsung.
 
 ---
 
@@ -124,12 +132,14 @@ Setiap skripsi yang ditemukan akan diberi status:
 
 | Status | Arti |
 |--------|------|
-| ✅ **FULL** | Seluruh bab tersedia dan kemungkinan besar bisa diunduh |
-| 🟡 **PARTIAL** | Ada beberapa bab, tapi belum pasti lengkap |
-| 🔴 **LOCKED** | Terdeteksi pembatasan akses (login, embargo, campus-only) |
+| ✅ **FULL** | Bab 1, 3, 4, 5, dan Daftar Pustaka terdeteksi di dalam isi PDF |
+| 🟡 **PARTIAL** | Sebagian bab ditemukan — belum lengkap atau hanya terdeteksi dari HTML |
+| 🔴 **LOCKED** | PDF ada tapi tidak bisa diakses (login, embargo, campus-only) |
 | ⚪ **UNKNOWN** | Status tidak bisa ditentukan secara otomatis |
 
-Status ditentukan berdasarkan sistem skor: script mencari indikator seperti `"full text"`, `"open access"`, keberadaan link PDF, serta nama-nama bab (pendahuluan, metodologi, pembahasan, kesimpulan, dan seterusnya) di halaman detail.
+Sejak v1.3, status ditentukan berdasarkan **isi file PDF secara langsung** — script mengunduh ~250KB dari tiap PDF (bagian awal + akhir via HTTP Range request) lalu mencari heading bab di dalam dokumen. Jauh lebih akurat dibanding hanya membaca label di halaman HTML.
+
+Untuk repository yang memecah skripsi menjadi banyak file terpisah, script juga mendeteksi dan memverifikasi akses ke masing-masing file, lalu melaporkan bab mana yang tersedia dan mana yang terkunci.
 
 ---
 
@@ -159,13 +169,15 @@ Status ditentukan berdasarkan sistem skor: script mencari indikator seperti `"fu
 
 ```
 📁 pencari-skripsi-indonesia/
-├── pencari_skripsi.py   ← Script utama
+├── pencari_skripsi.py        ← Script utama
+├── pdf_analyzer.py           ← Modul analisis konten PDF (v1.3+)
 ├── repositories.json         ← Data 75+ universitas (edit di sini untuk tambah kampus)
+├── CHANGELOG.md              ← Riwayat perubahan tiap versi
 ├── README.md
 └── .cache_skripsi/           ← Cache otomatis, dibuat saat pertama kali dijalankan
 ```
 
-> `pencari_skripsi.py` dan `repositories.json` harus selalu berada di folder yang sama.
+> `pencari_skripsi.py`, `pdf_analyzer.py`, dan `repositories.json` harus selalu berada di folder yang sama.
 
 ---
 
@@ -245,6 +257,48 @@ Politeknik Negeri Malang, Politeknik Elektronika Negeri Surabaya, Politeknik Kes
 
 ---
 
+## Analisis Konten PDF (v1.3+)
+
+Fitur terbesar di v1.3 adalah kemampuan membaca isi file PDF secara langsung — bukan hanya metadata di halaman HTML.
+
+### Cara Kerjanya
+
+Script mengunduh ~250KB per file menggunakan **HTTP Range request** (bagian awal + akhir dokumen), lalu mengekstrak teks dengan `pdfminer.six` dan mencari 12 penanda struktural:
+
+| Bagian | Contoh yang Dideteksi |
+|---|---|
+| Cover / Judul | Halaman judul, nama universitas |
+| Abstrak | `abstrak`, `abstract`, `intisari` |
+| Bab 1 | `BAB I Pendahuluan`, `Latar Belakang Masalah` |
+| Bab 2 | `Tinjauan Pustaka`, `Landasan Teori` |
+| Bab 3 | `Metodologi Penelitian`, `Desain Penelitian` |
+| Bab 4 | `Hasil dan Pembahasan`, `Analisis Data` |
+| Bab 5 | `Kesimpulan dan Saran`, `Penutup` |
+| Daftar Pustaka | `References`, `Bibliography` |
+| Lampiran | `Appendix` |
+
+Status `FULL` hanya diberikan jika **semua bab utama** (1, 3, 4, 5, dan Daftar Pustaka) ditemukan di dalam PDF — bukan dari label di halaman repository.
+
+### Deteksi Multi-File
+
+Beberapa repository (terutama DSpace lama) memecah skripsi menjadi banyak file terpisah. Script mendeteksi ini secara otomatis dan menampilkan status per bab:
+
+```
+📂 Multi-file: 6 bab tersedia
+  ✓ bab 1 - pendahuluan       https://repo.../bab1.pdf
+  ✓ bab 2 - tinjauan pustaka  https://repo.../bab2.pdf
+  ✓ bab 3 - metodologi        https://repo.../bab3.pdf
+  ✗ bab 4 - hasil             [TERKUNCI]
+  ✓ bab 5 - kesimpulan        https://repo.../bab5.pdf
+  ✓ daftar pustaka            https://repo.../pustaka.pdf
+```
+
+### Tanpa pdfminer.six
+
+Script tetap berfungsi normal — hanya deteksi multi-file yang aktif, analisis isi PDF dinonaktifkan. Status ditentukan dari HTML seperti versi sebelumnya.
+
+---
+
 ## Tentang OAI-PMH
 
 Script ini menggunakan **OAI-PMH** (Open Archives Initiative Protocol for Metadata Harvesting) sebagai metode fetch utama. Ini adalah protokol standar internasional yang diimplementasikan oleh hampir semua platform repository ilmiah — termasuk EPrints dan DSpace yang dipakai oleh 80%+ perguruan tinggi di Indonesia.
@@ -257,8 +311,16 @@ Bedanya dengan scraping HTML biasa: OAI-PMH memberikan data terstruktur langsung
 
 - Script menambahkan jeda antar request (default 1.2 detik) untuk tidak membebani server universitas
 - Hasil cache disimpan di `.cache_skripsi/` dan otomatis kedaluwarsa setelah 24 jam
+- Analisis PDF mengunduh maksimal ~250KB per file — tidak mengunduh dokumen secara penuh
 - Beberapa universitas membatasi akses dari luar kampus — hasilnya tetap muncul dengan status `unknown`
+- PDF berbasis scan/gambar tidak bisa dianalisis teksnya — status otomatis `unknown`, perlu cek manual
 - URL dan struktur repository bisa berubah sewaktu-waktu; perbarui `repositories.json` jika ada yang tidak lagi berfungsi
+
+---
+
+## Changelog
+
+Lihat [CHANGELOG.md](CHANGELOG.md) untuk riwayat lengkap perubahan tiap versi.
 
 ---
 
@@ -269,6 +331,7 @@ Pull request sangat disambut, terutama untuk:
 - **Menambah universitas baru** ke `repositories.json`
 - **Memperbaiki parser** untuk repository dengan struktur HTML yang tidak umum
 - **Memperbarui URL** repository yang sudah berubah domain atau path
+- **Meningkatkan pola deteksi bab** di `pdf_analyzer.py` untuk format penulisan yang belum ter-cover
 
 ---
 
